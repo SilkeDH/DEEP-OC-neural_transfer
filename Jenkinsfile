@@ -9,8 +9,7 @@ pipeline {
 
     environment {
         dockerhub_repo = "silked/deep-oc-neural_transfer"
-        base_cpu_tag = "1.4-cuda10.1-cudnn7-runtime"
-        base_gpu_tag = "1.4-cuda10.1-cudnn7-runtime"
+        base_tag = "1.4-cuda10.1-cudnn7-runtime"
     }
 
     stages {
@@ -40,38 +39,31 @@ pipeline {
                         id = "${env.dockerhub_repo}"
 
                         if (env.BRANCH_NAME == 'master') {
-                           // CPU (aka latest, i.e. default)
+		           // CPU (aka latest, i.e. default)
+                           // GPU : pytorch allows to run same image on CPU or GPU
                            id_cpu = DockerBuild(id,
-                                            tag: ['latest', 'cpu'], 
+                                            tag: ['latest', 'cpu', 'gpu'], 
                                             build_args: ["tag=${env.base_cpu_tag}",
                                                          "branch=master"])
 
                            // Check that the image starts and get_metadata responses correctly
                            sh "bash ../check_oc_artifact/check_artifact.sh ${env.dockerhub_repo}"
 
-                           // GPU
-                           id_gpu = DockerBuild(id,
-                                            tag: ['gpu'], 
-                                            build_args: ["tag=${env.base_gpu_tag}",
-                                                         "branch=master"])
                         }
 
                         if (env.BRANCH_NAME == 'test') {
-                           // CPU
+                           // CPU + GPU
                            id_cpu = DockerBuild(id,
-                                            tag: ['test', 'cpu-test'], 
+                                            tag: ['test', 'cpu-test', 'gpu-test'],
                                             build_args: ["tag=${env.base_cpu_tag}",
                                                          "branch=test"])
 
                            // Check that the image starts and get_metadata responses correctly
                            sh "bash ../check_oc_artifact/check_artifact.sh ${env.dockerhub_repo}:test"
 
-                           // GPU
-                           id_gpu = DockerBuild(id,
-                                            tag: ['gpu-test'], 
-                                            build_args: ["tag=${env.base_gpu_tag}",
-                                                         "branch=test"])
                         }
+
+			DockerPush(id_cpu_gpu)
                     }
                 }
             }

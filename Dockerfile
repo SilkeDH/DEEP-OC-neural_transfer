@@ -15,7 +15,7 @@
 ARG tag=1.4-cuda10.1-cudnn7-runtime
 
 # Base image, e.g. tensorflow/tensorflow:1.14.0-py3
-FROM pytorch:${tag}
+FROM pytorch/pytorch:${tag}
 
 LABEL maintainer='Silke Donayre (KIT)'
 LABEL version='0.0.1'
@@ -25,7 +25,7 @@ LABEL version='0.0.1'
 ARG branch=master
 
 # If to install JupyterLab
-ARG jlab=false
+ARG jlab=true
 
 # Install ubuntu updates and python related stuff
 # link python3 to python, pip3 to pip, if needed
